@@ -292,6 +292,13 @@ footer {
     gap: 18px;
     flex-wrap: wrap;
   }
+    .contact p {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    text-align: left;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
 }
 </style>
 </head>
