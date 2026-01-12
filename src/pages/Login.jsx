@@ -1,0 +1,41 @@
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+import { useState } from "react";
+import "../styles/Login.css";
+
+export default function Login({ goRegister, onSuccess }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const login = async () => {
+    await signInWithEmailAndPassword(auth, email, password);
+    onSuccess();
+  };
+
+  return (
+    <div className="auth-container">
+      <div className="card">
+        <h2>Login</h2>
+
+        <input
+          placeholder="Email"
+          onChange={e => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          onChange={e => setPassword(e.target.value)}
+        />
+
+        <button onClick={login}>Login</button>
+
+        <div className="link">
+          Don't have an account?{" "}
+          <span className="register-link" onClick={goRegister}>
+            Register here
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

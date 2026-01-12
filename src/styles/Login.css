@@ -1,0 +1,173 @@
+/* ===============================
+   CYBERPUNK NEON LOGIN
+   Dark • Neon • Futuristic
+================================ */
+
+/* Background */
+.auth-container {
+  min-height: 100dvh; /* ✅ FIX: mobile-safe viewport */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+
+  background:
+    radial-gradient(circle at top left, rgba(255, 0, 102, 0.15), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(0, 255, 170, 0.12), transparent 45%),
+    linear-gradient(135deg, #05000a, #0b0014, #12001f);
+}
+
+/* Neon glass card */
+.card {
+  width: 380px;
+  padding: 34px 30px;
+  border-radius: 22px;
+
+  background: rgba(15, 0, 25, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 0, 102, 0.35);
+
+  box-shadow:
+    0 0 20px rgba(255, 0, 102, 0.35),
+    0 0 60px rgba(0, 255, 170, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+
+  text-align: center;
+  animation: cyberIn 0.8s ease;
+}
+
+/* Title */
+.card h2 {
+  font-size: 30px;
+  font-weight: 800;
+  margin-bottom: 22px;
+
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  text-shadow:
+    0 0 6px #ff0066,
+    0 0 14px rgba(255, 0, 102, 0.7);
+}
+
+/* Inputs */
+.card input {
+  width: 100%;
+  padding: 13px 15px;
+  margin-bottom: 16px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  outline: none;
+
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffffff;
+  font-size: 15px;
+
+  transition: box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.card input::placeholder {
+  color: #8f8f9f;
+}
+
+.card input:focus {
+  border-color: #00ffaa;
+  box-shadow:
+    0 0 10px rgba(0, 255, 170, 0.6),
+    0 0 25px rgba(0, 255, 170, 0.3);
+}
+
+/* Button */
+.card button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+
+  background: linear-gradient(135deg, #ff0066, #ff3cac);
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  box-shadow:
+    0 0 15px rgba(255, 0, 102, 0.6),
+    0 0 35px rgba(255, 0, 102, 0.35);
+
+  transition: transform 0.25s ease, box-shadow 0.3s ease;
+}
+
+.card button:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 25px rgba(255, 0, 102, 0.9),
+    0 0 55px rgba(255, 0, 102, 0.6);
+}
+
+.card button:active {
+  transform: translateY(0);
+}
+
+/* Register link */
+.link {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #00ffaa;
+  letter-spacing: 0.5px;
+
+  text-shadow:
+    0 0 8px rgba(0, 255, 170, 0.7);
+
+  transition: opacity 0.3s ease;
+}
+
+.register-link {
+  color: #6366f1;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.register-link:hover {
+  text-decoration: underline;
+}
+
+
+/* Animation */
+@keyframes cyberIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 420px) {
+  .card {
+    width: 100%;
+    padding: 28px 22px;
+  }
+}
+
+/* ===============================
+   MOBILE SAFETY FIX (CRITICAL)
+================================ */
+@media (max-width: 768px) {
+  .card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

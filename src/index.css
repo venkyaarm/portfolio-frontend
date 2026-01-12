@@ -1,0 +1,33 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ROOT – MOBILE SAFE */
+html {
+  width: 100%;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f172a;
+  overflow-y: auto;      /* ✅ MUST */
+  overflow-x: visible;  /* ✅ DO NOT HIDE */
+  position: relative;   /* ✅ NOT fixed */
+}
+
+/* REACT ROOT */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* SMOOTH TEXT */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

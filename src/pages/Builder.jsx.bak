@@ -1,0 +1,387 @@
+import { useEffect, useState } from "react";
+import { uploadFile } from "../cloudinary";
+import { db, auth } from "../firebase";
+import {
+  addDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  updateDoc,
+  doc
+} from "firebase/firestore";
+import "../styles/builder.css";
+
+export default function Builder({ setPortfolio }) {
+
+  const [data, setData] = useState({
+    name: "",
+    title: "",
+    about: "",
+    location: "",
+    github: "",
+    linkedin: "",
+    instagram: "",
+    phone: "",
+    email:"",
+    imageUrl: "",
+    resumeUrl: ""
+  });
+
+  // STRUCTURED STATES
+  const [skills, setSkills] = useState([]);         
+  const [projects, setProjects] = useState([]);     
+  const [experience, setExperience] = useState([]); 
+  const [education, setEducation] = useState([]);   
+
+  const [image, setImage] = useState(null);
+  const [resume, setResume] = useState(null);
+  const [docId, setDocId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  /* LOAD PORTFOLIO */
+  useEffect(() => {
+    const load = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const q = query(
+        collection(db, "portfolios"),
+        where("userId", "==", user.uid)
+      );
+
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        const saved = snap.docs[0];
+
+        setData(prev => ({ ...prev, ...saved.data() }));
+        setSkills(saved.data().skills || []);
+        setProjects(saved.data().projects || []);
+        setExperience(saved.data().experience || []);
+        setEducation(saved.data().education || []);
+
+        setDocId(saved.id);
+        setPortfolio(saved.data());
+      }
+    };
+
+    load();
+  }, [setPortfolio]);
+
+  const handleChange = (key, value) => {
+    setData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const logout = async () => {
+    await auth.signOut();
+    window.location.reload();
+  };
+
+  const savePortfolio = async () => {
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const imageUrl = image ? await uploadFile(image) : data.imageUrl;
+      const resumeUrl = resume ? await uploadFile(resume) : data.resumeUrl;
+
+      const finalData = {
+        ...data,
+        skills,
+        projects,
+        experience,
+        education,
+        imageUrl,
+        resumeUrl,
+        userId: user.uid,
+        updatedAt: new Date()
+      };
+
+      if (docId) {
+        await updateDoc(doc(db, "portfolios", docId), finalData);
+      } else {
+        const ref = await addDoc(collection(db, "portfolios"), finalData);
+        setDocId(ref.id);
+      }
+
+      setPortfolio(finalData);
+      alert("Portfolio saved successfully ✅");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save portfolio ❌");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="builder-shell">
+
+      {/* HEADER */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 className="builder-heading">Portfolio Builder</h1>
+        <button className="add-btn" onClick={logout}>Logout</button>
+      </div>
+
+      {/* BASIC */}
+      <section className="builder-section">
+        <h3>Basic Information</h3>
+
+        <div className="row"><label>Name</label>
+          <input value={data.name} onChange={e => handleChange("name", e.target.value)} />
+        </div>
+
+        <div className="row"><label>Title</label>
+          <input value={data.title} onChange={e => handleChange("title", e.target.value)} />
+        </div>
+
+        <div className="row"><label>Location</label>
+          <input value={data.location} onChange={e => handleChange("location", e.target.value)} />
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section className="builder-section">
+        <h3>About</h3>
+        <textarea value={data.about} onChange={e => handleChange("about", e.target.value)} />
+      </section>
+
+      {/* SKILLS */}
+      <section className="builder-section">
+        <h3>Skills</h3>
+
+        {skills.map((s, i) => (
+          <div key={i} className="dynamic-row">
+            <input
+              value={s.value}
+              onChange={e => {
+                const copy = [...skills];
+                copy[i].value = e.target.value;
+                setSkills(copy);
+              }}
+            />
+            <button onClick={() => setSkills(skills.filter((_, idx) => idx !== i))}>✕</button>
+          </div>
+        ))}
+
+        <button onClick={() => setSkills([...skills, { value: "" }])}>
+          + Add Skill
+        </button>
+      </section>
+
+      {/* PROJECTS */}
+      <section className="builder-section">
+        <h3>Projects</h3>
+
+        {projects.map((p, i) => (
+          <div key={i} className="project-box">
+            <input
+              placeholder="Project Title"
+              value={p.title}
+              onChange={e => {
+                const copy = [...projects];
+                copy[i].title = e.target.value;
+                setProjects(copy);
+              }}
+            />
+            <textarea
+              placeholder="Project Description"
+              value={p.description}
+              onChange={e => {
+                const copy = [...projects];
+                copy[i].description = e.target.value;
+                setProjects(copy);
+              }}
+            />
+            <button onClick={() => setProjects(projects.filter((_, idx) => idx !== i))}>
+              ❌ Delete Project
+            </button>
+          </div>
+        ))}
+
+        <button onClick={() => setProjects([...projects, { title: "", description: "" }])}>
+          + Add Project
+        </button>
+      </section>
+
+      {/* EXPERIENCE */}
+      <section className="builder-section">
+        <h3>Experience</h3>
+
+        {experience.map((e, i) => (
+          <div key={i} className="dynamic-row">
+            <textarea
+              value={e.value}
+              onChange={ev => {
+                const copy = [...experience];
+                copy[i].value = ev.target.value;
+                setExperience(copy);
+              }}
+            />
+            <button onClick={() => setExperience(experience.filter((_, idx) => idx !== i))}>✕</button>
+          </div>
+        ))}
+
+        <button onClick={() => setExperience([...experience, { value: "" }])}>
+          + Add Experience
+        </button>
+      </section>
+
+      {/* EDUCATION */}
+      <section className="builder-section">
+        <h3>Education</h3>
+
+        {education.map((e, i) => (
+          <div key={i} className="dynamic-row">
+            <input
+              value={e.value}
+              onChange={ev => {
+                const copy = [...education];
+                copy[i].value = ev.target.value;
+                setEducation(copy);
+              }}
+            />
+            <button onClick={() => setEducation(education.filter((_, idx) => idx !== i))}>✕</button>
+          </div>
+        ))}
+
+        <button onClick={() => setEducation([...education, { value: "" }])}>
+          + Add Education
+        </button>
+      </section>
+
+      {/* CONTACT */}
+      <section className="builder-section">
+        <h3>Contact</h3>
+
+        <div className="row"><label>GitHub</label>
+          <input value={data.github} onChange={e => handleChange("github", e.target.value)} />
+        </div>
+
+        <div className="row"><label>LinkedIn</label>
+          <input value={data.linkedin} onChange={e => handleChange("linkedin", e.target.value)} />
+        </div>
+
+        <div className="row"><label>Instagram</label>
+          <input value={data.instagram} onChange={e => handleChange("instagram", e.target.value)} />
+        </div>
+
+	<div className="row"><label>Email</label>
+          <input value={data.email} onChange={e => handleChange("phone", e.target.value)} />
+        </div>
+
+        <div className="row"><label>Phone</label>
+          <input value={data.phone} onChange={e => handleChange("phone", e.target.value)} />
+        </div>
+      </section>
+
+{/* MEDIA */}
+<section className="builder-section">
+  <h3>Media</h3>
+
+  {/* PROFILE IMAGE */}
+  <div className="row" style={{ gap: "10px", alignItems: "center" }}>
+    <label>Profile Image</label>
+
+    {(data.imageUrl || image) ? (
+      <>
+        <button
+          type="button"
+          className="add-btn"
+          onClick={() =>
+            window.open(
+              image ? URL.createObjectURL(image) : data.imageUrl,
+              "_blank"
+            )
+          }
+        >
+          View Image
+        </button>
+
+        <button
+          type="button"
+          className="add-btn"
+          onClick={() => document.getElementById("imageInput").click()}
+        >
+          Update Image
+        </button>
+      </>
+    ) : (
+      <button
+        type="button"
+        className="add-btn"
+        onClick={() => document.getElementById("imageInput").click()}
+      >
+        Upload Image
+      </button>
+    )}
+
+    <input
+      id="imageInput"
+      type="file"
+      accept="image/*"
+      style={{ display: "none" }}
+      onChange={e => setImage(e.target.files[0])}
+    />
+  </div>
+
+  {/* RESUME */}
+  <div
+    className="row"
+    style={{ gap: "10px", alignItems: "center", marginTop: "12px" }}
+  >
+    <label>Resume</label>
+
+    {(data.resumeUrl || resume) ? (
+      <>
+        <button
+          type="button"
+          className="add-btn"
+          onClick={() =>
+            window.open(
+              resume ? URL.createObjectURL(resume) : data.resumeUrl,
+              "_blank"
+            )
+          }
+        >
+          View Resume
+        </button>
+
+        <button
+          type="button"
+          className="add-btn"
+          onClick={() => document.getElementById("resumeInput").click()}
+        >
+          Update Resume
+        </button>
+      </>
+    ) : (
+      <button
+        type="button"
+        className="add-btn"
+        onClick={() => document.getElementById("resumeInput").click()}
+      >
+        Upload Resume
+      </button>
+    )}
+
+    <input
+      id="resumeInput"
+      type="file"
+      accept=".pdf"
+      style={{ display: "none" }}
+      onChange={e => setResume(e.target.files[0])}
+    />
+  </div>
+</section>
+
+
+
+      <button className="save-btn" onClick={savePortfolio} disabled={loading}>
+        {loading ? "Saving..." : "Save & Update Portfolio"}
+      </button>
+
+    </div>
+  );
+}
